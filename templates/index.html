@@ -6,14 +6,53 @@
     <meta name="language" content="en" />
     <meta name="keywords" content="twitter targetting marketing on twitter intelligence tweets tweet" />
     <meta name="description" content="cancer tweets" />
-    <title>cancer tweets</title>
+    <title>TweetAndBeat.com</title>
+    <style type="text/css" media="screen"><!--
+      body 
+      {
+      color: grey;
+      margin-top: 3%;
+      margin-bottom: 3%;
+      margin-right: 10%;
+      margin-left: 10%;
+      font-size: 10px
+      font-family: Verdana, Geneva, Arial, sans-serif;
+      }
+    </style>
+
+
+
   </head>
   <body>
+
+      <center>
+	<h3><a href="/">Tweet And Beat Cancer</a></h3>
+	<h5>crawling and indexing twitter for all tweets with the word cancer in it. minus the spam, links and other junk.</h5>
+      
+      {% if next_tweet_id %}
+      <p> <a href="?next={{ next_tweet_id }}">Next</a></p>
+      {% endif %}
+      </center>
+
       {% for result in result_list %}
       <a href="http://twitter.com/{{ result.from_user }}">{{ result.from_user }}</a>&nbsp;
       {{ result.text }}
       <i><small>(about {{ result.created_at|timesince }} ago)</small></i>
       <p/>
       {% endfor %}
+      <hr>
+      <center>
+	Copyright &copy; <a href="http://twitter.com/hnag">Hareesh Nagarajan</a> 2010
+	</center>
     </body>
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+      var pageTracker = _gat._getTracker("UA-12683651-1");
+      pageTracker._trackPageview();
+      } catch(err) {}
+    </script>
 </html>

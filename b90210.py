@@ -106,19 +106,6 @@ class TwitterSearch:
     just_source = just_source.split('/')[0]
     return just_source
 
-  def format_tweet(self, text):
-    if text.find('@') != -1:
-      tokens = text.split()
-      formatted = []
-      for token in tokens:
-        if token.find('@') == 0:
-          at = '@<a href="http://twitter.com/%s">%s</a>' % (token[1:], token[1:])
-          formatted.append(at)
-        formatted.append(token)
-      ret = ' '.join(formatted)
-      logging.info('Formatted!! %s', ret)
-    return text
-
   def get_date(self, created_at):
     ts = calendar.timegm(time.strptime(created_at,
                                        '%a, %d %b %Y %H:%M:%S +0000'))
@@ -187,14 +174,50 @@ def NO_RT_OR_LINK(result):
     return True
   return False
 
+def format_text(text):
+  tokens = text.split()
+  formatted = []
+  for token in tokens:
+    if token.find('@') == 0:
+      at = '@<a href="http://twitter.com/%s">%s</a>' % (token[1:], token[1:])
+      formatted.append(at)
+    elif token.find('#') == 0:
+      hashtag = '<a href="http://twitter.com/search?q=%s">%s</a>' % (token, token)
+      formatted.append(hashtag)
+    else:
+      formatted.append(token)
+  return ' '.join(formatted)
+
+class PrettySearchObject():
+  def __init__(self, text, from_user, created_at):
+    self.text = text
+    self.from_user = from_user
+    self.created_at = created_at
+
 # <img alt="%s" border=0 width=48px height=48px src="{{ result.profile_image_url }}">
 class Home(webapp.RequestHandler):
   def get(self):
-    result_list = db.GqlQuery(
-      "SELECT * FROM SearchObject ORDER BY created_at DESC LIMIT 1000")
+    PAGESIZE=20
+    next_tweet_id = None
+    next_bookmark = self.request.get("next")
+    if next_bookmark:
+      result_list = SearchObject.all().order("-tweet_id").filter('tweet_id <=', int(next_bookmark)).fetch(PAGESIZE+1)
+    else:
+      result_list = SearchObject.all().order("-tweet_id").fetch(PAGESIZE+1)
+      
+    if len(result_list) == PAGESIZE+1:
+      next_tweet_id = result_list[-1].tweet_id
+      result_list = result_list[:PAGESIZE]
+
+    new_result_list = []
+    for rr in result_list:
+      new_result_list.append(PrettySearchObject(format_text(rr.text), rr.from_user, rr.created_at))
+
     template_values = {
-      'result_list' : result_list,
+      'result_list' : new_result_list,
+      'next_tweet_id' : next_tweet_id,
       }
+
     path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
     self.response.out.write(template.render(path, template_values))
     
