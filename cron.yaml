@@ -1,0 +1,8 @@
+cron:
+- description: do search and populate the database
+  url: /cron
+  schedule: every 2 minutes
+
+
+
+ 
