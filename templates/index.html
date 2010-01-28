@@ -18,6 +18,7 @@
       font-size: 10px
       font-family: Verdana, Geneva, Arial, sans-serif;
       }
+
     </style>
 
 
@@ -26,20 +27,29 @@
   <body>
 
       <center>
-	<h3><a href="/">Tweet And Beat Cancer</a></h3>
-	<h5>crawling and indexing twitter for all tweets with the word cancer in it. minus the spam, links and other junk.</h5>
+	<h3><a href="/">TweetAndBeat Cancer</a></h3>
+	<pre>crawling and indexing twitter for all tweets with the word cancer in it. no spam.</pre>
       
       {% if next_tweet_id %}
-      <p> <a href="?next={{ next_tweet_id }}">Next</a></p>
+	<a href="?next={{ next_tweet_id }}">Next</a>
       {% endif %}
       </center>
 
       {% for result in result_list %}
-      <a href="http://twitter.com/{{ result.from_user }}">{{ result.from_user }}</a>&nbsp;
+      <a href="http://twitter.com/{{ result.from_user }}">
+	  <img alt="%s" border=0 width=48px height=48px src="{{ result.profile_image_url }}">
+      </a>
       {{ result.text }}
       <i><small>(about {{ result.created_at|timesince }} ago)</small></i>
       <p/>
       {% endfor %}
+
+      <center>
+	{% if next_tweet_id %}
+	<a href="?next={{ next_tweet_id }}">Next</a>
+	{% endif %}
+      </center>
+
       <hr>
       <center>
 	Copyright &copy; <a href="http://twitter.com/hnag">Hareesh Nagarajan</a> 2010

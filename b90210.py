@@ -182,25 +182,30 @@ def format_text(text):
       at = '@<a href="http://twitter.com/%s">%s</a>' % (token[1:], token[1:])
       formatted.append(at)
     elif token.find('#') == 0:
-      hashtag = '<a href="http://twitter.com/search?q=%s">%s</a>' % (token, token)
-      formatted.append(hashtag)
+      hashtag = '<a href="http://search.twitter.com/search?q=%s">%s</a>' % (token[1:], token[:])
+      formatted.append('%%23%s' % token[1:])
     else:
       formatted.append(token)
   return ' '.join(formatted)
 
 class PrettySearchObject():
-  def __init__(self, text, from_user, created_at):
+  def __init__(self, text, from_user, created_at, profile_image_url):
     self.text = text
     self.from_user = from_user
     self.created_at = created_at
+    self.profile_image_url = profile_image_url
 
-# <img alt="%s" border=0 width=48px height=48px src="{{ result.profile_image_url }}">
 class Home(webapp.RequestHandler):
   def get(self):
     PAGESIZE=20
     next_tweet_id = None
     next_bookmark = self.request.get("next")
     if next_bookmark:
+      try:
+        next_bookmark = int(next_bookmark)
+      except ValueError, e:
+        self.redirect('/')
+        return
       result_list = SearchObject.all().order("-tweet_id").filter('tweet_id <=', int(next_bookmark)).fetch(PAGESIZE+1)
     else:
       result_list = SearchObject.all().order("-tweet_id").fetch(PAGESIZE+1)
@@ -211,7 +216,11 @@ class Home(webapp.RequestHandler):
 
     new_result_list = []
     for rr in result_list:
-      new_result_list.append(PrettySearchObject(format_text(rr.text), rr.from_user, rr.created_at))
+      new_result_list.append(
+        PrettySearchObject(format_text(rr.text),
+                           rr.from_user,
+                           rr.created_at,
+                           rr.profile_image_url))
 
     template_values = {
       'result_list' : new_result_list,
