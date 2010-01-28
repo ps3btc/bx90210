@@ -240,9 +240,10 @@ class Sources(webapp.RequestHandler):
   def get(self):
     src_page = memcache.get("sources_page")
     if src_page:
-      logging.info('sources hit memcache')
-      self.response.out.write(src_page)
-      return
+      pass
+      #logging.info('sources hit memcache')
+      #self.response.out.write(src_page)
+      #return
     
     PAGESIZE=1000
     sources = {}
@@ -261,7 +262,6 @@ class Sources(webapp.RequestHandler):
         result_list = result_list[:PAGESIZE]
       else:
         ret = False
-        logging.info('Hit %d', len(result_list))
 
       total += len(result_list)
       for rr in result_list:
@@ -269,7 +269,6 @@ class Sources(webapp.RequestHandler):
           sources[rr.source]+=1
         else:
           sources[rr.source]=1
-
 
     ll=[]
 
@@ -287,7 +286,8 @@ class Sources(webapp.RequestHandler):
 
     path = os.path.join(os.path.dirname(__file__), 'templates/sources.html')
     src_page = template.render(path, template_values)
-    memcache.add("sources_page", src_page, 86400)
+    memcache.add("sources_page", src_page, 3600)
+    logging.info('added sources to memcache')
     self.response.out.write(src_page)
 
 def main():
