@@ -7,6 +7,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from google.appengine.api import memcache
+
 import StringIO
 import calendar
 import datetime
@@ -229,7 +230,7 @@ class Home(webapp.RequestHandler):
 
     path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
     self.response.out.write(template.render(path, template_values))
-    
+
 class Cron(webapp.RequestHandler):
   def get(self):
     ts = TwitterSearch('cancer')
@@ -237,8 +238,57 @@ class Cron(webapp.RequestHandler):
 
 class Sources(webapp.RequestHandler):
   def get(self):
-    ts = TwitterSearch('cancer')
-    ts.search()
+    src_page = memcache.get("sources_page")
+    if src_page:
+      logging.info('sources hit memcache')
+      self.response.out.write(src_page)
+      return
+    
+    PAGESIZE=1000
+    sources = {}
+
+    next_tweet_id = None
+    ret = True
+    total = 0
+    while ret:
+      if next_tweet_id:
+        result_list = SearchObject.all().order("-tweet_id").filter('tweet_id <=', next_tweet_id).fetch(PAGESIZE+1)
+      else:
+        result_list = SearchObject.all().order("-tweet_id").fetch(PAGESIZE+1)
+        
+      if len(result_list) == PAGESIZE+1:
+        next_tweet_id = result_list[-1].tweet_id
+        result_list = result_list[:PAGESIZE]
+      else:
+        ret = False
+        logging.info('Hit %d', len(result_list))
+
+      total += len(result_list)
+      for rr in result_list:
+        if rr.source in sources:
+          sources[rr.source]+=1
+        else:
+          sources[rr.source]=1
+
+
+    ll=[]
+
+    alist = sorted(sources.iteritems(), key=lambda (k,v): (v, k), reverse=True)
+    for l in alist:
+      src = l[0]
+      cnt = l[1]
+      percent = (cnt*100.0)/total
+      ll.append('%s %d (%0.2f%%)' % (src, cnt, percent))
+
+    template_values = {
+      'sources' : ll,
+      'total' : total,
+      }
+
+    path = os.path.join(os.path.dirname(__file__), 'templates/sources.html')
+    src_page = template.render(path, template_values)
+    memcache.add("sources_page", src_page, 86400)
+    self.response.out.write(src_page)
 
 def main():
   wsgiref.handlers.CGIHandler().run(webapp.WSGIApplication([
