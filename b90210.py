@@ -182,8 +182,8 @@ def format_text(text):
       at = '@<a href="http://twitter.com/%s">%s</a>' % (token[1:], token[1:])
       formatted.append(at)
     elif token.find('#') == 0:
-      hashtag = '<a href="http://search.twitter.com/search?q=%s">%s</a>' % (token[1:], token[:])
-      formatted.append('%%23%s' % token[1:])
+      hashtag = '<a href="http://search.twitter.com/search?q=%%23%s">%s</a>' % (token[1:], token)
+      formatted.append('%s' % hashtag)
     else:
       formatted.append(token)
   return ' '.join(formatted)
