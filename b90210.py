@@ -231,6 +231,34 @@ class Home(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
     self.response.out.write(template.render(path, template_values))
 
+class Dave(webapp.RequestHandler):
+  def get(self):
+    PAGESIZE=990
+    next_tweet_id = None
+    next_bookmark = self.request.get("next")
+    if next_bookmark:
+      try:
+        next_bookmark = int(next_bookmark)
+      except ValueError, e:
+        self.redirect('/')
+        return
+      result_list = SearchObject.all().order("-tweet_id").filter('tweet_id <=', int(next_bookmark)).fetch(PAGESIZE+1)
+    else:
+      result_list = SearchObject.all().order("-tweet_id").fetch(PAGESIZE+1)
+      
+    if len(result_list) == PAGESIZE+1:
+      next_tweet_id = result_list[-1].tweet_id
+      result_list = result_list[:PAGESIZE]
+
+    template_values = {
+      'result_list' : result_list,
+      'next_tweet_id' : next_tweet_id,
+      }
+
+    path = os.path.join(os.path.dirname(__file__), 'templates/dave.html')
+    self.response.out.write(template.render(path, template_values))
+
+
 class Cron(webapp.RequestHandler):
   def get(self):
     ts = TwitterSearch('cancer')
@@ -293,6 +321,7 @@ class Sources(webapp.RequestHandler):
 def main():
   wsgiref.handlers.CGIHandler().run(webapp.WSGIApplication([
     ('/', Home),
+    ('/dave', Dave),
     ('/cron', Cron),
     ('/sources', Sources),
     ]))
