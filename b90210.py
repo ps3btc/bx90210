@@ -273,7 +273,7 @@ class Sources(webapp.RequestHandler):
       #self.response.out.write(src_page)
       #return
     
-    PAGESIZE=1000
+    PAGESIZE=200
     sources = {}
 
     next_tweet_id = None
