@@ -323,7 +323,6 @@ def main():
     ('/', Home),
     ('/dave', Dave),
     ('/cron', Cron),
-    ('/sources', Sources),
     ]))
    
 if __name__ == '__main__':
