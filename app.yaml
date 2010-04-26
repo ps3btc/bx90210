@@ -12,14 +12,16 @@ handlers:
   static_files: static/robots.txt
   upload: static/robots.txt
 
-- url: .*
-  script: b90210.py
-  
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
 - url: /cron
   script: b90210.py
   login: admin
 
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
+- url: .*
+  script: b90210.py
+  
+
 
