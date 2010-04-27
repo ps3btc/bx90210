@@ -20,6 +20,10 @@ handlers:
   script: b90210.py
   login: admin
 
+- url: /delete
+  script: b90210.py
+  login: admin
+
 - url: .*
   script: b90210.py
   

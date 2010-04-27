@@ -119,19 +119,10 @@ class TwitterSearch:
       tid=tweet_id)
     for result in result_list:
       return True
-
-    result_list = db.GqlQuery(
-      "SELECT * FROM RTLinkObject WHERE tweet_id = :tid "
-      "ORDER BY tweet_id DESC LIMIT 1000",
-      tid=tweet_id)
-    for result in result_list:
-      return True
-
     return False
 
   def process_results(self, results):
     regular_idx = 0
-    rt_idx = 0
     ignore = 0
     exists = 0
     total = 0
@@ -150,9 +141,6 @@ class TwitterSearch:
       if self.no_rt_or_link(result):
         write_obj = SearchObject()
         regular_idx += 1
-      else:
-        write_obj = RTLinkObject()
-        rt_idx += 1
 
       write_obj.tweet_id = result['id']
       write_obj.created_at = self.get_date(result['created_at'])
@@ -165,8 +153,8 @@ class TwitterSearch:
     # Write it all in 1 shot.
     db.put(to_write)
           
-    logging.info('total: %d wrote [search: %d, rt: %d] ignored: %d, exists: %d' %
-                 (total, regular_idx, rt_idx, ignore, exists))
+    logging.info('total: %d wrote [search: %d] ignored: %d, exists: %d' %
+                 (total, regular_idx, ignore, exists))
 
 
 def NO_RT_OR_LINK(result):
@@ -198,7 +186,7 @@ class PrettySearchObject():
 
 class Home(webapp.RequestHandler):
   def get(self):
-    PAGESIZE=20
+    PAGESIZE=100
     next_tweet_id = None
     next_bookmark = self.request.get("next")
     if next_bookmark:
@@ -264,14 +252,22 @@ class Cron(webapp.RequestHandler):
     ts = TwitterSearch('cancer')
     ts.search()
 
+class Delete(webapp.RequestHandler):
+  def get(self):
+    limit = self.request.get("limit") or 300
+    result = db.GqlQuery("SELECT __key__ FROM RTLinkObject").fetch(int(limit))
+    if result:
+      db.delete(result)
+      logging.info('deleted %s', limit)
+      self.response.out.write('deleted %s' % limit)
+    else:
+      self.response.out.write('nothing to delete')
+
 class Sources(webapp.RequestHandler):
   def get(self):
     src_page = memcache.get("sources_page")
     if src_page:
       pass
-      #logging.info('sources hit memcache')
-      #self.response.out.write(src_page)
-      #return
     
     PAGESIZE=200
     sources = {}
@@ -323,6 +319,7 @@ def main():
     ('/', Home),
     ('/dave', Dave),
     ('/cron', Cron),
+    ('/delete', Delete),
     ]))
    
 if __name__ == '__main__':

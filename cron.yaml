@@ -3,3 +3,6 @@ cron:
   url: /cron
   schedule: every 10 minutes
  
+- description: delete rtlinkobject
+  url: /delete
+  schedule: every 1 minutes
