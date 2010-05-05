@@ -1,7 +1,7 @@
 cron:
 - description: do search and populate the database
   url: /cron
-  schedule: every 10 minutes
+  schedule: every 3 minutes
  
 - description: delete rtlinkobject
   url: /delete

@@ -1,0 +1,32 @@
+    {% extends "base.html" %}
+      {% block content %}
+    <center>
+      <h1>
+        <a href="/">tweetandbeat.com</a>
+      </h1>
+      <p>
+        <b><a href="/about">what is tweetandbeat?</a></b>
+      </p>
+      {% if next_tweet_id %}
+      <a href="?next={{ next_tweet_id }}">next</a>
+      {% endif %}
+    </center>
+    
+    {% for result in result_list %}
+    <a href="http://twitter.com/{{ result.from_user }}">
+      <img alt="%s" border=0 width=48px height=48px src="{{ result.profile_image_url }}">
+    </a>
+    {{ result.text }}
+    <i>
+      <small>
+        (about {{ result.created_at|timesince }} ago)
+      </small>
+    </i>
+    <p/>
+      {% endfor %}
+    <center>
+      {% if next_tweet_id %}
+      <a href="?next={{ next_tweet_id }}">next</a>
+      {% endif %}
+    </center>
+    {% endblock %}

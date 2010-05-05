@@ -137,22 +137,19 @@ class TwitterSearch:
         exists += 1
         continue
         
-      write_obj = None
       if self.no_rt_or_link(result):
-        write_obj = SearchObject()
         regular_idx += 1
-
-      write_obj.tweet_id = result['id']
-      write_obj.created_at = self.get_date(result['created_at'])
-      write_obj.text = result['text']
-      write_obj.profile_image_url = result['profile_image_url']
-      write_obj.from_user = result['from_user']
-      write_obj.source = self.extract_source(result['source'])
-      to_write.append(write_obj)
+        write_obj = SearchObject()
+        write_obj.tweet_id = result['id']
+        write_obj.created_at = self.get_date(result['created_at'])
+        write_obj.text = result['text']
+        write_obj.profile_image_url = result['profile_image_url']
+        write_obj.from_user = result['from_user']
+        write_obj.source = self.extract_source(result['source'])
+        to_write.append(write_obj)
 
     # Write it all in 1 shot.
     db.put(to_write)
-          
     logging.info('total: %d wrote [search: %d] ignored: %d, exists: %d' %
                  (total, regular_idx, ignore, exists))
 
@@ -216,41 +213,28 @@ class Home(webapp.RequestHandler):
       'next_tweet_id' : next_tweet_id,
       }
 
-    path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/oldhome.html')
     self.response.out.write(template.render(path, template_values))
 
-class Dave(webapp.RequestHandler):
+class About(webapp.RequestHandler):
   def get(self):
-    PAGESIZE=990
-    next_tweet_id = None
-    next_bookmark = self.request.get("next")
-    if next_bookmark:
-      try:
-        next_bookmark = int(next_bookmark)
-      except ValueError, e:
-        self.redirect('/')
-        return
-      result_list = SearchObject.all().order("-tweet_id").filter('tweet_id <=', int(next_bookmark)).fetch(PAGESIZE+1)
-    else:
-      result_list = SearchObject.all().order("-tweet_id").fetch(PAGESIZE+1)
-      
-    if len(result_list) == PAGESIZE+1:
-      next_tweet_id = result_list[-1].tweet_id
-      result_list = result_list[:PAGESIZE]
-
     template_values = {
-      'result_list' : result_list,
-      'next_tweet_id' : next_tweet_id,
-      }
-
-    path = os.path.join(os.path.dirname(__file__), 'templates/dave.html')
+        }
+    path = os.path.join(os.path.dirname(__file__), 'templates/about.html')
     self.response.out.write(template.render(path, template_values))
-
-
+    
 class Cron(webapp.RequestHandler):
   def get(self):
     ts = TwitterSearch('cancer')
     ts.search()
+    self.response.out.write('done')
+
+class Rate(webapp.RequestHandler):
+  def get(self):
+    a = urllib2.urlopen('http://api.twitter.com/1/account/rate_limit_status.json')
+    contents = a.read()
+    logging.info(contents)
+    self.response.out.write(contents)
 
 class Delete(webapp.RequestHandler):
   def get(self):
@@ -258,10 +242,8 @@ class Delete(webapp.RequestHandler):
     result = db.GqlQuery("SELECT __key__ FROM RTLinkObject").fetch(int(limit))
     if result:
       db.delete(result)
-      logging.info('deleted %s', limit)
-      self.response.out.write('deleted %s' % limit)
     else:
-      self.response.out.write('nothing to delete')
+      logging.info('nothing to delete')
 
 class Sources(webapp.RequestHandler):
   def get(self):
@@ -317,9 +299,10 @@ class Sources(webapp.RequestHandler):
 def main():
   wsgiref.handlers.CGIHandler().run(webapp.WSGIApplication([
     ('/', Home),
-    ('/dave', Dave),
     ('/cron', Cron),
     ('/delete', Delete),
+    ('/rate', Rate),
+    ('/about', About),
     ]))
    
 if __name__ == '__main__':
