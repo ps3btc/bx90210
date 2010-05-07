@@ -1,44 +1,33 @@
-    {% extends "base.html" %}
-      {% block content %}
-    <center>
-      <h1>
-        <a href="/">tweetandbeat.com</a>
-      </h1>
-      <p>
-        <b><a href="/about">what is tweetandbeat?</a></b>
-      </p>
-      {% if next_tweet_id %}
-      <a href="?next={{ next_tweet_id }}">next</a>
-      {% endif %}
-    </center>
+{% extends "new_base.html" %}
 
-      <div id="cse" style="width: 100%;">Loading</div>
-      <script src="http://www.google.com/jsapi" type="text/javascript"></script>
-      <script type="text/javascript">
-        google.load('search', '1', {language : 'en'});
-        google.setOnLoadCallback(function(){
-        var customSearchControl = new google.search.CustomSearchControl('014684023565193159567:enswtoxiofe');
-        customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-        customSearchControl.draw('cse');
-        }, true);
-      </script>
-      <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
-    
-    {% for result in result_list %}
-    <a href="http://twitter.com/{{ result.from_user }}">
-      <img alt="%s" border=0 width=48px height=48px src="{{ result.profile_image_url }}">
-    </a>
-    {{ result.text }}
-    <i>
-      <small>
-        (about {{ result.created_at|timesince }} ago)
-      </small>
-    </i>
-    <p/>
-      {% endfor %}
-    <center>
-      {% if next_tweet_id %}
-      <a href="?next={{ next_tweet_id }}">next</a>
-      {% endif %}
-    </center>
-    {% endblock %}
+{% block thumbnails %}
+{% for result in result_list %}
+<a title="{{ result.from_user }}" href="http://twitter.com/{{ result.from_user }}"><img alt="{{ result.from_user }}" border=0 width=48px height=48px src="{{ result.profile_image_url }}"></a>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<center>
+{% if next_tweet_id %}
+<b><a href="?next={{ next_tweet_id }}">next page</a></b>
+{% endif %}
+</center>
+{% for result in result_list %}
+<th><td onMouseOver="document.getElementById('reply').style.visibility='visible';">
+<a href="http://twitter.com/{{ result.from_user }}"><img src="{{ result.profile_image_url }}" width="48x" height="48px" ></img></a>
+</td><td><span class="date">
+({{ result.created_at|timesince }} ago)</span> <small>{{ result.text }}</small>
+
+<span class="reply">
+<a href="http://twitter.com/?status=@{{ result.from_user }}&in_reply_to_status_id={{ result.created_at }}&in_reply_to={{ result.from_user }}"><img src="/static/reply.png" title="Reply and encourage {{ result.from_user }}"></a>
+</span>
+
+</td></th>
+
+
+
+{% if forloop.counter|divisibleby:"3" %}
+</tr><tr>
+{% endif %}
+{% endfor %}
+{% endblock %}

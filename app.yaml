@@ -1,5 +1,5 @@
 application: bx90210
-version: 1c3
+version: 1c4
 runtime: python
 api_version: 1
 
@@ -11,6 +11,21 @@ handlers:
 - url: /robots.txt
   static_files: static/robots.txt
   upload: static/robots.txt
+
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /static/main.css
+  static_files: static/main.css
+  upload: static/main.css
+
+- url: /static/powered-by-twitter-sig.gif
+  static_files: static/powered-by-twitter-sig.gif
+  upload: static/powered-by-twitter-sig.gif
+
+- url: /static/reply.png
+  static_files: static/reply.png
+  upload: static/reply.png
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py

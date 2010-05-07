@@ -183,7 +183,7 @@ class PrettySearchObject():
 
 class Home(webapp.RequestHandler):
   def get(self):
-    PAGESIZE=100
+    PAGESIZE=60
     next_tweet_id = None
     next_bookmark = self.request.get("next")
     if next_bookmark:
@@ -221,6 +221,13 @@ class About(webapp.RequestHandler):
     template_values = {
         }
     path = os.path.join(os.path.dirname(__file__), 'templates/about.html')
+    self.response.out.write(template.render(path, template_values))
+
+class Search(webapp.RequestHandler):
+  def get(self):
+    template_values = {
+        }
+    path = os.path.join(os.path.dirname(__file__), 'templates/search.html')
     self.response.out.write(template.render(path, template_values))
     
 class Cron(webapp.RequestHandler):
@@ -303,6 +310,7 @@ def main():
     ('/delete', Delete),
     ('/rate', Rate),
     ('/about', About),
+    ('/search', Search),
     ]))
    
 if __name__ == '__main__':
