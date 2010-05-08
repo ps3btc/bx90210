@@ -17,7 +17,7 @@
 <td>
 <a href="http://twitter.com/{{ result.from_user }}"><img src="{{ result.profile_image_url }}" width="48x" height="48px" ></img></a>
 </td><td><span class="date">
-(&nbsp;<b>{{ result.created_at|timesince }} ago; <a href="http://twitter.com/?status=@{{ result.from_user }}&in_reply_to_status_id={{ result.created_at }}&in_reply_to={{ result.from_user }}">&hearts;</a></b>&nbsp;)</span>
+(<b>{{ result.created_at|timesince }} ago; <a href="http://twitter.com/?status=@{{ result.from_user }}&in_reply_to_status_id={{ result.created_at }}&in_reply_to={{ result.from_user }}">&hearts;</a></b>)</span>
 <small>
 {{ result.text }}</small>
 </td>
