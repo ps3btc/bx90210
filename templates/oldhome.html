@@ -13,16 +13,15 @@
 {% endif %}
 </center>
 {% for result in result_list %}
-<th><td onMouseOver="document.getElementById('reply').style.visibility='visible';">
+<th>
+<td>
 <a href="http://twitter.com/{{ result.from_user }}"><img src="{{ result.profile_image_url }}" width="48x" height="48px" ></img></a>
 </td><td><span class="date">
-({{ result.created_at|timesince }} ago)</span> <small>{{ result.text }}</small>
-
-<span class="reply">
-<a href="http://twitter.com/?status=@{{ result.from_user }}&in_reply_to_status_id={{ result.created_at }}&in_reply_to={{ result.from_user }}"><img src="/static/reply.png" title="Reply and encourage {{ result.from_user }}"></a>
-</span>
-
-</td></th>
+(&nbsp;<b>{{ result.created_at|timesince }} ago; <a href="http://twitter.com/?status=@{{ result.from_user }}&in_reply_to_status_id={{ result.created_at }}&in_reply_to={{ result.from_user }}">&hearts;</a></b>&nbsp;)</span>
+<small>
+{{ result.text }}</small>
+</td>
+</th>
 
 
 

@@ -183,7 +183,7 @@ class PrettySearchObject():
 
 class Home(webapp.RequestHandler):
   def get(self):
-    PAGESIZE=60
+    PAGESIZE=30
     next_tweet_id = None
     next_bookmark = self.request.get("next")
     if next_bookmark:
